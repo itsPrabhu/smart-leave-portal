@@ -1,0 +1,28 @@
+{
+  "name": "smartleave-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:setup": "node scripts/setupDatabase.js",
+    "test": "node --check server.js && node --check db.js && node --check routes/auth.js && node --check routes/leaves.js && node --check routes/notifications.js && node --check routes/admin.js && node --check routes/analytics.js && node --check routes/profile.js && node --check middleware/authMiddleware.js && node --check scripts/setupDatabase.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "mysql2": "^3.22.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
