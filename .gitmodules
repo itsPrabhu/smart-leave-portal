@@ -1,0 +1,3 @@
+[submodule "smart-leave-hub"]
+	path = smart-leave-hub
+	url = https://github.com/itsPrabhu/smart-leave-hub
