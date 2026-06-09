@@ -12,6 +12,8 @@ const {
   DB_USER = "root",
   DB_PASSWORD = "",
   DB_NAME = "smartleave",
+  DB_SSL = "false",
+  DB_CREATE_DATABASE = "true",
 } = process.env;
 
 async function seed(connection) {
@@ -152,10 +154,14 @@ async function main() {
     port: Number(DB_PORT),
     user: DB_USER,
     password: DB_PASSWORD,
+    database: DB_CREATE_DATABASE === "false" ? DB_NAME : undefined,
+    ssl: DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
     multipleStatements: true,
   });
 
-  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``);
+  if (DB_CREATE_DATABASE !== "false") {
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``);
+  }
   await connection.query(`USE \`${DB_NAME}\``);
 
   const schema = fs.readFileSync(path.join(__dirname, "..", "db", "schema.sql"), "utf8");
