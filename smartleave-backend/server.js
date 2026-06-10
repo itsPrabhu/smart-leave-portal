@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // ----------------------
-// CORS Configuration (FIXED)
+// Allowed Origins
 // ----------------------
 const allowedOrigins = [
   "https://smart-leave-hub.onrender.com",
@@ -16,24 +16,33 @@ const allowedOrigins = [
   "http://localhost:3000",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow tools like Postman / server-to-server requests
-      if (!origin) return callback(null, true);
+// ----------------------
+// CORS Configuration (FIXED)
+// ----------------------
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log("Request origin:", origin);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+    // Allow server-to-server / Postman
+    if (!origin) return callback(null, true);
 
-// 🔥 IMPORTANT: Handle preflight requests
-app.options(/.*/, cors());
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("❌ CORS blocked:", origin);
+      callback(null, false); // DO NOT throw error
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+// Apply CORS BEFORE routes
+app.use(cors(corsOptions));
+
+// IMPORTANT: Handle preflight requests
+app.options("*", cors(corsOptions));
 
 // ----------------------
 // Middlewares
@@ -65,7 +74,8 @@ app.use((req, res) => {
 // Error Handler
 // ----------------------
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("Server Error:", err);
+
   res.status(err.status || 500).json({
     message: err.message || "Server Error",
   });
@@ -78,7 +88,7 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Handle server errors
+// Handle startup errors
 server.on("error", (error) => {
   console.error("Server failed to start:", error);
 });
