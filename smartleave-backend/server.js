@@ -7,7 +7,18 @@ dotenv.config({ quiet: true });
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+// CORS Configuration
+app.use(
+  cors({
+    origin: [
+      "https://smart-leave-hub.onrender.com",
+      "http://localhost:5173",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/api/health", (req, res) => {
@@ -27,7 +38,9 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(err.status || 500).json({ message: err.message || "Server Error" });
+  res.status(err.status || 500).json({
+    message: err.message || "Server Error",
+  });
 });
 
 const server = app.listen(PORT, () => {
