@@ -17,7 +17,7 @@ const allowedOrigins = [
 ];
 
 // ----------------------
-// CORS Configuration (FIXED)
+// CORS Configuration
 // ----------------------
 const corsOptions = {
   origin: function (origin, callback) {
@@ -30,7 +30,7 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.log("❌ CORS blocked:", origin);
-      callback(null, false); // DO NOT throw error
+      callback(null, false);
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -38,13 +38,21 @@ const corsOptions = {
   credentials: true,
 };
 
-// Apply CORS BEFORE routes
+// ----------------------
+// Middlewares (IMPORTANT ORDER)
+// ----------------------
 app.use(cors(corsOptions));
+app.use(express.json({ limit: "10mb" }));
 
 // ----------------------
-// Middlewares
+// Safe Preflight Handler (FIX for Render + Node 24)
 // ----------------------
-app.use(express.json({ limit: "10mb" }));
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // ----------------------
 // Routes
@@ -61,7 +69,7 @@ app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/profile", require("./routes/profile"));
 
 // ----------------------
-// 404 Handler
+// 404 Handler (NO "*" USED)
 // ----------------------
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
