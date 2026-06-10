@@ -41,9 +41,6 @@ const corsOptions = {
 // Apply CORS BEFORE routes
 app.use(cors(corsOptions));
 
-// IMPORTANT: Handle preflight requests
-app.options("*", cors(corsOptions));
-
 // ----------------------
 // Middlewares
 // ----------------------
