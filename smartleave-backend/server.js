@@ -7,20 +7,42 @@ dotenv.config({ quiet: true });
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// CORS Configuration
+// ----------------------
+// CORS Configuration (FIXED)
+// ----------------------
+const allowedOrigins = [
+  "https://smart-leave-hub.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: [
-      "https://smart-leave-hub.onrender.com",
-      "http://localhost:5173",
-      "http://localhost:3000",
-    ],
+    origin: function (origin, callback) {
+      // Allow tools like Postman / server-to-server requests
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
+// 🔥 IMPORTANT: Handle preflight requests
+app.options("*", cors());
+
+// ----------------------
+// Middlewares
+// ----------------------
 app.use(express.json({ limit: "10mb" }));
 
+// ----------------------
+// Routes
+// ----------------------
 app.get("/api/health", (req, res) => {
   res.json({ message: "Backend Running" });
 });
@@ -32,10 +54,16 @@ app.use("/api/admin", require("./routes/admin"));
 app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/profile", require("./routes/profile"));
 
+// ----------------------
+// 404 Handler
+// ----------------------
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// ----------------------
+// Error Handler
+// ----------------------
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(err.status || 500).json({
@@ -43,10 +71,14 @@ app.use((err, req, res, next) => {
   });
 });
 
+// ----------------------
+// Start Server
+// ----------------------
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// Handle server errors
 server.on("error", (error) => {
   console.error("Server failed to start:", error);
 });
